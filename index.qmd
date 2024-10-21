@@ -1,8 +1,8 @@
 ---
 title: "Self-reported life satisfaction, 2011 to 2023"
 subtitle: "Replicating the Our World in Data Grapher"
-author: "YOUR NAME HERE" # Remember to add your name!
-date: "16-10-2024"
+author: "Glenn De Lange" # Remember to add your name!
+date: "21-10-2024"
 theme: united
 ---
 
@@ -45,19 +45,25 @@ The main life evaluation question asked in the poll is the Cantril Life Ladder q
 
 > “Please imagine a ladder, with steps numbered from 0 at the bottom to 10 at the top. The top of the ladder represents the best possible life for you and the bottom of the ladder represents the worst possible life for you. On which step of the ladder would you say you personally feel you stand at this time?”
 
-
+:::{.panel-tabset}
 ## 🔢 Table
 
 **Average self-reported life satisfaction** – Cantril Ladder score (0=worst; 10=best)
 
 ```{r}
-# In this tab, you will create a table similar to the one on the Our World in Data page. The table should have the following columns:
-# Country, `2011`, `2023`, Absolute change, and Relative change.
-
-
-# Create table
-
-"WRITE_YOUR_CODE_HERE"
+cantril %>%
+  filter(Year %in% c(2011, 2023)) %>%
+  pivot_wider(names_from = Year, values_from = `Cantril ladder score`) %>%
+  select(Country, `2011`, `2023`) %>%
+  mutate(`Absolute change` = `2023` - `2011`,
+         `Relative change` = scales::percent((`2023` - `2011`) / `2011`, accuracy = 0.01)) %>%
+  reactable(
+    columns = list(
+      `2011` = colDef(format = colFormat(digits = 2)),
+      `2023` = colDef(format = colFormat(digits = 2)),
+      `Absolute change` = colDef(format = colFormat(digits = 2))
+    )
+  )
 ```
 
 
@@ -107,7 +113,16 @@ cantril %>%
 # Note that your chart will not have the ability to filter countries like the one on the Our World in Data page.
 
 # Create line chart
-"WRITE_YOUR_CODE_HERE"
+cantril %>%
+  filter(Country %in% c("Norway", "Australia", "Germany", "Bolivia", "Colombia", "Bhutan")) %>%
+  plot_ly(
+    x = ~Year,
+    y = ~`Cantril ladder score`,
+    color = ~Country,
+    type = "scatter",
+    mode = "lines+markers"
+  ) %>%
+  layout(yaxis = list(range = c(0, 10)))
 ```
 
 ## 📈 Advanced Chart
@@ -150,7 +165,7 @@ bscols(
   list(country_filter, cantril_plotly)
 )
 ```
-
+:::
 <!-- Custom javascript to set default values in the filter: -->
 <script>
 function filter_default() {
